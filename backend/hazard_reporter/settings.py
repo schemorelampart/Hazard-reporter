@@ -14,7 +14,7 @@ print("ENV DEBUG:", os.getenv("DEBUG"), file=sys.stderr)
 # --- Django secret and debug ---
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-placeholder')
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,0.0.0.0", ).split(",")
 
 
 # --- AWS S3 Storage configuration ---
