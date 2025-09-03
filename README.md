@@ -1,9 +1,12 @@
 # Hazard Reporter
+#Status Badge for workflow ⬇️⬇️ ️️
+[![CI](https://github.com/schemorelampart/Hazard-reporter/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/schemorelampart/Hazard-reporter/actions/workflows/ci.yml)
 
 A full-stack hazard reporting web application built with **Django REST Framework (DRF)**, **React**, and **AWS**.  
 The app allows users to submit, track, and view hazard reports through a modern web interface backed by a scalable cloud deployment.
 
-✅ Working health check: `/api/health/` → `{ "ok": true }`  
+✅ Working health check: `/api/health/` → `{ "ok": true }
+`  
 🌍 Live domain: [https://hazardpatrol.com](https://hazardpatrol.com)
 
 ---
