@@ -5,3 +5,4 @@ boto3>=1.34
 pillow>=10.0  # for image uploads
 python-dotenv>=1.0
 
+django-storages[boto3]>=1.14
