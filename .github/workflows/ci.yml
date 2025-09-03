@@ -1,56 +1,37 @@
-name: CI Pipeline
-
+name: CI
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  push: { branches: [ main ] }
+  pull_request: { branches: [ main ] }
 
 jobs:
   backend:
-    name: Django Backend Checks
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-
-      - name: Install backend dependencies
-        working-directory: backend
+          python-version: '3.12'     # or '3.13' if your deps support it
+      - name: Install dependencies
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements.txt
-
-      - name: Run Django checks
-        working-directory: backend
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+      - name: Django sanity check
+        env:
+          DEBUG: "False"
+          SECRET_KEY: "dummy-ci-secret"
+          ALLOWED_HOSTS: "localhost,127.0.0.1"
         run: |
-          source .venv/bin/activate
-          python manage.py check
+          python backend/manage.py check --deploy
 
   frontend:
-    name: React Frontend Build
     runs-on: ubuntu-latest
-
+    defaults:
+      run: { working-directory: frontend }
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm install
-
-      - name: Build frontend
-        working-directory: frontend
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Install
+        run: npm ci
+      - name: Build
         run: npm run build
-
