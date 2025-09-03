@@ -6,17 +6,21 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
-      - name: Install deps
+      - name: Install backend dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
@@ -36,62 +40,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install deps
-        run: npm ci
+      # (B) Update npm before install to dodge optional-deps bugs
+      - name: Use latest npm
+        run: npm i -g npm@latest
 
-      - name: Build
-        run: npm run build
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-<<<<<<< HEAD
-          python-version: '3.12'  # or '3.13' if your deps support it
-=======
-          python-version: '3.12'
->>>>>>> d097d41 (ci: fix indentation and ensure proper paths)
-
-      - name: Install deps
+      # (A) Resilient install: try npm ci; if it hits the Rollup optional-deps bug, fall back
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
+          set -e
+          npm ci || (rm -rf node_modules package-lock.json && npm install)
 
-      - name: Django sanity check
-        env:
-          DEBUG: "False"
-          SECRET_KEY: "dummy-ci-secret"
-          ALLOWED_HOSTS: "localhost,127.0.0.1"
-        run: python backend/manage.py check --deploy
-
-  frontend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install deps
-        run: npm ci
-
+      # (A) Force Rollup to skip native binary path if optional dep didn’t land
       - name: Build
+        env:
+          ROLLUP_SKIP_NODEJS_NATIVE: '1'
         run: npm run build
